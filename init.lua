@@ -163,9 +163,6 @@ vim.opt.scrolloff = 10
 -- See `:help 'confirm'`
 vim.opt.confirm = true
 
-vim.opt.spell = true
-vim.opt.spelllang = 'en_us'
-
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
@@ -484,8 +481,8 @@ require('lazy').setup({
       -- Automatically install LSPs and related tools to stdpath for Neovim
       -- Mason must be loaded before its dependents so we need to set it up here.
       -- NOTE: `opts = {}` is the same as calling `require('mason').setup({})`
-      { 'williamboman/mason.nvim', version = '^1.0.0', opts = {} },
-      { 'williamboman/mason-lspconfig.nvim', version = '^1.0.0' },
+      { 'williamboman/mason.nvim', opts = {} },
+      { 'williamboman/mason-lspconfig.nvim' },
       'WhoIsSethDaniel/mason-tool-installer.nvim',
 
       -- Useful status updates for LSP.
@@ -541,6 +538,10 @@ require('lazy').setup({
           --  This is where a variable was first declared, or where a function is defined, etc.
           --  To jump back, press <C-t>.
           map('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
+          -- map('gd', function()
+          -- vim.cmd "normal! m'"
+          -- require('telescope.builtin').lsp_definitions()
+          -- end, '[G]oto [D]efinition')
 
           -- Find references for the word under your cursor.
           map('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
@@ -674,7 +675,11 @@ require('lazy').setup({
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
-        basedpyright = {},
+        basedpyright = {
+          settings = {
+            basedpyright = { typeCheckingMode = 'off' },
+          },
+        },
         -- clangd = {},
         -- gopls = {},
         -- pyright = {},
@@ -903,13 +908,57 @@ require('lazy').setup({
   {
     'catppuccin/nvim',
     name = 'catppuccin',
-    priority = 1000,
+    priority = 1000000,
     config = function()
       require('catppuccin').setup {
-        flavour = 'mocha', -- or "latte", "frappe", "macchiato"
-
-        term_colors = false, -- Neovim manages its own colors
+        flavour = 'latte', -- latte, frappe, macchiato, mocha
+        background = { -- :h background
+          light = 'latte',
+          dark = 'mocha',
+        },
+        transparent_background = true, -- disables setting the background color.
+        show_end_of_buffer = false, -- shows the '~' characters after the end of buffers
+        term_colors = false, -- sets terminal colors (e.g. `g:terminal_color_0`)
+        dim_inactive = {
+          enabled = false, -- dims the background color of inactive window
+          shade = 'dark',
+          percentage = 0.15, -- percentage of the shade to apply to the inactive window
+        },
+        no_italic = false, -- Force no italic
+        no_bold = false, -- Force no bold
+        no_underline = false, -- Force no underline
+        styles = { -- Handles the styles of general hi groups (see `:h highlight-args`):
+          comments = { 'italic' }, -- Change the style of comments
+          conditionals = { 'italic' },
+          loops = {},
+          functions = {},
+          keywords = {},
+          strings = {},
+          variables = {},
+          numbers = {},
+          booleans = {},
+          properties = {},
+          types = {},
+          operators = {},
+          -- miscs = {}, -- Uncomment to turn off hard-coded styles
+        },
+        color_overrides = {},
+        custom_highlights = {},
+        default_integrations = true,
+        integrations = {
+          cmp = true,
+          gitsigns = true,
+          nvimtree = true,
+          treesitter = true,
+          notify = false,
+          mini = {
+            enabled = true,
+            indentscope_color = '',
+          },
+        },
       }
+
+      -- setup must be called before loading
       vim.cmd.colorscheme 'catppuccin'
     end,
   },
@@ -1059,7 +1108,8 @@ require('lazy').setup({
   },
 })
 
-vim.cmd.colorscheme 'catppuccin-mocha'
+vim.cmd 'colorscheme default' -- Reset to default
+vim.cmd 'colorscheme catppuccin-frappe' -- Apply new flavor
 
 -- The line beneath this is called `modeline`. See `:help modeline`init
 -- vim: ts=2 sts=2 sw=2 et
